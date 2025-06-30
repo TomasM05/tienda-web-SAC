@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAC Repuestos</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Configuración de Tailwind con la nueva paleta de colores
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'sac-dark': 'rgb(23, 32, 42)',      /* Azul/Negro oscuro para fondo principal, texto oscuro */
+                        'sac-accent': 'rgb(255, 0, 51)',  /* Rojo vibrante para acentos y botones de acción */
+                        'sac-bg-light': 'rgb(244, 246, 246)', /* Fondo muy claro */
+                        'sac-text-light': 'rgb(204, 209, 209)', /* Texto claro sobre fondos oscuros */
+                        'sac-text-medium': 'rgb(81, 90, 90)',  /* Gris medio para texto general */
+                        'sac-border': 'rgb(170, 183, 184)',  /* Gris azulado claro para bordes */
+                        'sac-success': 'rgb(40, 167, 69)', /* Verde para acciones de éxito/compra */
+                        'whatsapp-green': '#25D366', /* Verde de WhatsApp */
+                        'facebook-blue': '#1877F2',  /* Azul de Facebook */
+                        'instagram-button-bg': 'rgb(128, 122, 122)', /* Nuevo fondo gris para el botón de Instagram */
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Aplicar la fuente Inter a todo el cuerpo */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Estilos personalizados para la barra de desplazamiento para una mejor estética */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Estilo para el botón de Instagram con color sólido */
+        .instagram-button {
+            background-color: var(--tw-colors-instagram-button-bg);
+        }
+
+        /* Estilos para el spinner de carga */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-sac-bg-light text-sac-text-medium antialiased">
+
+    <!-- Encabezado de la tienda con un degradado de color y sombra -->
+    <header class="bg-gradient-to-r from-sac-dark to-sac-accent text-sac-text-light p-4 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
+            <!-- Logo de la tienda -->
+            <img src="https://inquisitive-chimera-8a1cdc.netlify.app/media/logo-sac-png.png" alt="SAC Repuestos Logo" class="h-16 w-auto p-1 rounded-lg bg-sac-dark bg-opacity-20 shadow-md">
+            <!-- Navegación principal -->
+            <nav class="mt-4 md:mt-0">
+                <ul class="flex space-x-6">
+                    <li><a href="#" id="nav-home" class="hover:text-sac-text-light transition duration-300">Inicio</a></li>
+                    <li><a href="#" id="nav-products" class="hover:text-sac-text-light transition duration-300">Productos</a></li>
+                    <li><a href="#" id="nav-about" class="hover:text-sac-text-light transition duration-300">Acerca de</a></li>
+                    <li><a href="#" id="nav-contact" class="hover:text-sac-text-light transition duration-300">Contacto</a></li>
+                    <!-- Enlace del Carrito que ahora abre un modal -->
+                    <li><a href="#" id="view-cart-link" class="flex items-center hover:text-sac-text-light transition duration-300">
+                        <!-- Icono de carrito de compras (SVG) -->
+                        <svg class="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0-12a2 2 0 110 4 2 2 0 010-4zm-10 4a2 2 0 110 4 2 2 0 010-4zm2.5-1.5V9.5m0-4V5.5m0-4v-1.5m0-4v-1.5M7 21a1 1 0 11-2 0 1 1 0 012 0zm12 0a1 1 0 11-2 0 1 1 0 012 0z"></path></svg>
+                        Carrito (<span id="cart-count">0</span>)
+                    </a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="container mx-auto p-6 mt-8">
+        <!-- Sección de Inicio -->
+        <section id="home-section" class="mb-12">
+            <div class="text-center mb-12 bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-5xl font-extrabold text-sac-dark mb-4">SAC Repuestos: Tu Solución Automotriz</h2>
+                <p class="text-lg text-sac-text-medium max-w-2xl mx-auto">
+                    Con más de 30 años de experiencia, ofrecemos una amplia gama de repuestos automotores para vehículos livianos y pesados.
+                </p>
+            </div>
+
+            <!-- Productos Destacados en Inicio -->
+            <h3 class="text-3xl font-bold text-center text-sac-dark mb-8">Productos Destacados</h3>
+            <div id="featured-product-list" class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                <!-- Los 3 productos destacados se cargarán aquí por JavaScript -->
+            </div>
+
+            <!-- Información de la Empresa -->
+            <div class="bg-white rounded-xl shadow-lg p-8 flex flex-col md:flex-row items-center justify-center space-y-6 md:space-y-0 md:space-x-8">
+                <div class="md:w-1/2">
+                    <h3 class="text-3xl font-bold text-sac-dark mb-4">Sobre Nosotros</h3>
+                    <p class="text-lg text-sac-text-medium mb-4">
+                        Somos una empresa con más de 30 años en el rubro de repuestos automotor.
+                        Tenemos local físico con una gran atención al público, vendemos también por Mercado Libre,
+                        en el cual somos **Mercado Líder Platino**.
+                    </p>
+                    <p class="text-lg text-sac-text-medium mb-4">
+                        Rectificamos campanas, discos, cambiamos bujes y rectificamos embragues.
+                        Tenemos precio por mayor y por menor.
+                    </p>
+                    <p class="text-lg font-semibold text-sac-accent">
+                        Para ventas por mayor, por favor, diríjase al apartado de <a href="#" id="about-to-contact-link" class="underline hover:text-sac-dark transition duration-300">Contacto</a>.
+                    </p>
+                </div>
+                <div id="mechanic-images-container" class="md:w-1/2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Imágenes de mecánicos y taller se generarán aquí -->
+                    <div class="col-span-full flex items-center justify-center h-48 bg-gray-200 rounded-lg shadow-md">
+                        <div class="spinner mr-2"></div> Cargando imágenes...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Productos (inicialmente oculta) -->
+        <section id="products-section" class="hidden">
+            <!-- Barra de Búsqueda -->
+            <div class="mb-8 flex justify-center">
+                <div class="relative w-full max-w-xl">
+                    <input type="text" id="search-input" placeholder="Buscar repuestos..."
+                           class="w-full p-3 pl-10 pr-4 border border-sac-border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-sac-accent transition duration-200">
+                    <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-sac-text-medium" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+            </div>
+
+            <h2 class="text-4xl font-extrabold text-center text-sac-dark mb-10">Todos Nuestros Productos</h2>
+
+            <!-- Contenedor para las tarjetas de productos, cargadas por JavaScript -->
+            <div id="product-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                <!-- Las tarjetas de productos se cargarán aquí mediante JavaScript -->
+            </div>
+        </section>
+
+        <!-- Sección Acerca de (Acerca de la empresa y marcas) -->
+        <section id="about-section" class="hidden">
+            <div class="bg-white rounded-xl shadow-lg p-8 max-w-5xl mx-auto mb-12">
+                <h2 class="text-4xl font-extrabold text-center text-sac-dark mb-8">Acerca de SAC Repuestos</h2>
+
+                <p class="text-lg text-sac-text-medium mb-6">
+                    Somos una casa de repuestos automotriz con **30 años de experiencia** en este rubro.
+                    Trabajamos todo el tren delantero, embragues, frenos y demás.
+                    También tenemos repuestos para **línea pesada** como fuelles de suspensión neumática,
+                    pulmones de freno y mucho más.
+                </p>
+
+                <h3 class="text-3xl font-bold text-center text-sac-dark mt-10 mb-8">Algunas de las Marcas que Trabajamos</h3>
+                
+                <!-- Carrusel de Logos de Marcas -->
+                <div class="relative w-full overflow-hidden carousel-container">
+                    <div id="brand-carousel" class="flex transition-transform duration-500 ease-in-out">
+                        <!-- Logos de marcas se cargarán aquí por JavaScript -->
+                    </div>
+                    <!-- Botones de navegación del carrusel -->
+                    <button id="carousel-prev" class="carousel-button absolute top-1/2 left-0 transform -translate-y-1/2 bg-sac-dark bg-opacity-70 text-white p-3 rounded-full ml-2 hover:bg-opacity-100 transition duration-300 focus:outline-none">
+                        &#10094;
+                    </button>
+                    <button id="carousel-next" class="carousel-button absolute top-1/2 right-0 transform -translate-y-1/2 bg-sac-dark bg-opacity-70 text-white p-3 rounded-full mr-2 hover:bg-opacity-100 transition duration-300 focus:outline-none">
+                        &#10095;
+                    </button>
+                </div>
+                <!-- Indicadores de punto para el carrusel -->
+                <div id="carousel-dots" class="flex justify-center space-x-2 mt-4"></div>
+
+            </div>
+        </section>
+
+
+        <!-- Sección de Contacto (inicialmente oculta) -->
+        <section id="contact-section" class="hidden">
+            <div class="bg-white rounded-xl shadow-lg p-8 max-w-4xl mx-auto">
+                <h2 class="text-4xl font-extrabold text-center text-sac-dark mb-8">Contáctanos</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <!-- Información de contacto -->
+                    <div>
+                        <h3 class="text-2xl font-bold text-sac-dark mb-4">Información de Contacto</h3>
+                        <p class="text-lg text-sac-text-medium mb-3">
+                            <span class="font-semibold">Correo Electrónico:</span> sacrepuestos@hotmail.com
+                        </p>
+                        <p class="text-lg text-sac-text-medium mb-3">
+                            <span class="font-semibold">Teléfono de Mostrador:</span> 011-4622-6225
+                        </p>
+                        <p class="text-lg text-sac-text-medium mb-4">
+                            <span class="font-semibold">WhatsApp (Ventas):</span> 11-5494-1655 (Mercado Libre y Ventas Mayoristas/Minoristas)
+                        </p>
+
+                        <!-- Botón de WhatsApp con imagen PNG - Agrandado -->
+                        <a href="https://api.whatsapp.com/send?phone=541128882395&text=%C2%A1Hola!%20Estoy%20en%20la%20tienda%20SACREP%20y%20quiero%20pedir%20m%C3%A1s%20informaci%C3%B3n."
+                           target="_blank" rel="noopener noreferrer"
+                           class="inline-flex items-center justify-center px-10 py-5 rounded-lg bg-whatsapp-green text-white text-xl font-semibold shadow-md hover:bg-green-700 transition duration-300 mb-6">
+                            <img src="https://inquisitive-chimera-8a1cdc.netlify.app/media/whatsapp-logo-outline-white-icon-wa-app-transparent-background-premium-social-media-design-for-digital-download-free-png.png" alt="WhatsApp Logo" class="w-10 h-10 mr-4">
+                            WhatsApp
+                        </a>
+
+                        <h3 class="text-2xl font-bold text-sac-dark mb-4 mt-6">Síguenos en Redes</h3>
+                        <div class="flex space-x-4">
+                            <!-- Botón de Facebook con imagen PNG - Texto centrado -->
+                            <a href="https://www.facebook.com/profile.php?id=100093142759927" target="_blank" rel="noopener noreferrer"
+                               class="inline-flex items-center justify-center px-8 py-4 rounded-lg bg-facebook-blue text-white text-lg font-semibold shadow-md hover:bg-blue-800 transition duration-300">
+                                <img src="https://inquisitive-chimera-8a1cdc.netlify.app/media/1730342312_facebook-icon-png.png" alt="Facebook Logo" class="w-10 h-10 mr-2">
+                                Facebook
+                            </a>
+                            <!-- Botón de Instagram con imagen PNG - Fondo gris y nuevo logo -->
+                            <a href="https://www.instagram.com/sacrepuestos/" target="_blank" rel="noopener noreferrer"
+                               class="inline-flex items-center justify-center px-8 py-4 rounded-lg bg-[rgb(128,122,122)] text-white text-lg font-semibold shadow-md transition duration-300">
+                                <img src="https://inquisitive-chimera-8a1cdc.netlify.app/media/instagram-logo-white-outline-icon-ig-app-transparent-background-premium-social-media-design-for-digital-download-free-png.png" alt="Instagram Logo" class="w-10 h-10 mr-2">
+                                Instagram
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Dirección y Mapa -->
+                    <div>
+                        <h3 class="text-2xl font-bold text-sac-dark mb-4">Ubicación Física</h3>
+                        <p class="text-lg text-sac-text-medium mb-4">
+                            Avenida Velez Sarsfield 787<br>
+                            Ciudad Madero, La Matanza<br>
+                            Buenos Aires, Argentina
+                        </p>
+                        <!-- Google Maps embebido -->
+                        <div class="aspect-w-16 aspect-h-9 w-full rounded-lg overflow-hidden shadow-md">
+                            <iframe
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3280.5834900797317!2d-58.50076552410411!3d-34.690460162084655!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bcc92d5f245a47%3A0x1dda2433f6fa3515!2sSac%20Repuestos!5e0!3m2!1ses!2sar!4v1751141372990!5m2!1ses!2sar"
+                                width="400" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Caja de Mensajes para alertas/confirmaciones (en lugar de alert/confirm) -->
+        <div id="message-box" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+            <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full transform transition-all scale-95 opacity-0" id="message-box-content">
+                <h3 class="text-xl font-bold mb-4" id="message-box-title"></h3>
+                <p class="mb-6" id="message-box-message"></p>
+                <div class="flex justify-end space-x-3">
+                    <button id="message-box-cancel" class="px-5 py-2 bg-sac-border text-sac-text-medium rounded-lg hover:bg-gray-300 transition duration-300 hidden">Cancelar</button>
+                    <button id="message-box-ok" class="px-5 py-2 bg-sac-accent text-white rounded-lg hover:bg-red-700 transition duration-300">OK</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal del Carrito -->
+        <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+            <div class="bg-white rounded-xl shadow-2xl p-6 max-w-lg w-full transform transition-all scale-95 opacity-0" id="cart-modal-content">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold text-sac-dark">Tu Carrito</h3>
+                    <button id="close-cart-modal" class="text-gray-500 hover:text-sac-dark text-3xl leading-none">&times;</button>
+                </div>
+                <div id="cart-items-list" class="max-h-80 overflow-y-auto mb-6 border border-sac-border rounded-lg p-3">
+                    <!-- Los items del carrito se renderizarán aquí -->
+                </div>
+                <div class="flex justify-between items-center text-lg font-bold text-sac-dark mb-6">
+                    <span>Total:</span>
+                    <span id="cart-total">$0.00</span>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button id="checkout-button" class="px-6 py-3 bg-sac-success text-white rounded-lg hover:bg-green-700 transition duration-300 shadow-md">Finalizar Compra</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Pie de página -->
+    <footer class="bg-sac-dark text-sac-text-light py-8 mt-12">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2025 SAC Repuestos. Todos los derechos reservados.</p>
+            <div class="flex justify-center space-x-6 mt-4">
+                <a href="#" class="hover:text-white transition duration-300">Política de Privacidad</a>
+                <a href="#" class="hover:text-white transition duration-300">Términos de Servicio</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Array para almacenar los productos (simulando datos de backend)
+        let products = [
+            { id: 'prod001', name: 'Kit de Embrague (Línea Liviana)', price: 159.99, stock: 10, imageUrl: 'https://placehold.co/400x300/17202A/CCD1D1?text=Kit+Embrague' },
+            { id: 'prod002', name: 'Bujías Iridium (4 unidades)', price: 29.99, stock: 50, imageUrl: 'https://placehold.co/400x300/17202A/CCD1D1?text=Bujias' },
+            { id: 'prod003', name: 'Cables de Bujías (Juego)', price: 45.50, stock: 30, imageUrl: 'https://placehold.co/400x300/17202A/CCD1D1?text=Cables+Bujias' },
+            { id: 'prod004', name: 'Discos de Freno Ventilados (Par)', price: 110.00, stock: 18, imageUrl: 'https://placehold.co/400x300/17202A/CCD1D1?text=Discos+Freno' },
+            { id: 'prod005', name: 'Pastillas de Freno Cerámicas (Juego)', price: 65.00, stock: 25, imageUrl: 'https://placehold.co/400x300/17202A/CCD1D1?text=Pastillas+Freno' },
+            { id: 'prod006', name: 'Servo Freno (Universal)', price: 220.00, stock: 7, imageUrl: 'https://placehold.co/400x300/17202A/CCD1D1?text=Servo+Freno' },
+            { id: 'prod007', name: 'Amortiguador Delantero (Unidad)', price: 85.00, stock: 12, imageUrl: 'https://placehold.co/400x300/17202A/CCD1D1?text=Amortiguador' },
+            { id: 'prod008', name: 'Bieleta de Suspensión (Unidad)', price: 35.75, stock: 40, imageUrl: 'https://placehold.co/400x300/17202A/CCD1D1?text=Bieleta' },
+            { id: 'prod009', name: 'Kit Suspensión Trasera (Línea Pesada)', price: 450.00, stock: 5, imageUrl: 'https://placehold.co/400x300/17202A/CCD1D1?text=Suspension+Pesada' },
+            { id: 'prod010', price: 12.50, stock: 100, imageUrl: 'https://placehold.co/400x300/17202A/CCD1D1?text=Filtro+Aceite' }
+        ];
+
+        // Lista de logos de marcas para el carrusel
+        const brandLogos = [
+            { name: 'Corven', url: 'https://placehold.co/150x80/CCD1D1/17202A?text=Corven' },
+            { name: 'Bosch', url: 'https://placehold.co/150x80/CCD1D1/17202A?text=Bosch' },
+            { name: 'NGK', url: 'https://placehold.co/150x80/CCD1D1/17202A?text=NGK' },
+            { name: 'LUK', url: 'https://placehold.co/150x80/CCD1D1/17202A?text=LUK' },
+            { name: 'Gates', url: 'https://placehold.co/150x80/CCD1D1/17202A?text=Gates' },
+            { name: 'Dolz', url: 'https://placehold.co/150x80/CCD1D1/17202A?text=Dolz' },
+            { name: 'Mazfren', url: 'https://placehold.co/150x80/CCD1D1/17202A?text=Mazfren' },
+            { name: 'PHC Valeo', url: 'https://placehold.co/150x80/CCD1D1/17202A?text=PHC+Valeo' },
+            { name: 'SKF', url: 'https://placehold.co/150x80/CCD1D1/17202A?text=SKF' },
+            { name: 'Frasle', url: 'https://placehold.co/150x80/CCD1D1/17202A?text=Frasle' },
+            { name: 'Fremax', url: 'https://placehold.co/150x80/CCD1D1/17202A?text=Fremax' },
+            { name: 'Mahle', url: 'https://placehold.co/150x80/CCD1D1/17202A?text=Mahle' },
+            { name: 'Gulf', url: 'https://placehold.co/150x80/CCD1D1/17202A?text=Gulf' },
+            { name: 'INA Schafler', url: 'https://placehold.co/150x80/CCD1D1/17202A?text=INA+Schafler' },
+            { name: 'Cilbrake', url: 'https://placehold.co/150x80/CCD1D1/17202A?text=Cilbrake' },
+            { name: 'Wobron', url: 'https://placehold.co/150x80/CCD1D1/17202A?text=Wobron' }
+        ];
+
+        let cart = []; // Simula el carrito de compras
+
+        // --- Elementos del DOM generales ---
+        const messageBox = document.getElementById('message-box');
+        const messageBoxContent = document.getElementById('message-box-content');
+        const messageBoxTitle = document.getElementById('message-box-title');
+        const messageBoxMessage = document.getElementById('message-box-message');
+        const messageBoxOkButton = document.getElementById('message-box-ok');
+        const messageBoxCancelButton = document.getElementById('message-box-cancel');
+
+        // --- Elementos del DOM para navegación y secciones ---
+        const navHomeLink = document.getElementById('nav-home');
+        const navProductsLink = document.getElementById('nav-products');
+        const navAboutLink = document.getElementById('nav-about'); // Nuevo enlace "Acerca de"
+        const navContactLink = document.getElementById('nav-contact');
+        const aboutToContactLink = document.getElementById('about-to-contact-link');
+        const homeSection = document.getElementById('home-section');
+        const productsSection = document.getElementById('products-section');
+        const aboutSection = document.getElementById('about-section'); // Nueva sección "Acerca de"
+        const contactSection = document.getElementById('contact-section');
+        const featuredProductListDiv = document.getElementById('featured-product-list');
+
+        // Contenedor de imágenes de mecánicos y taller
+        const mechanicImagesContainer = document.getElementById('mechanic-images-container');
+
+        // --- Elementos del DOM para el modal del carrito ---
+        const cartModal = document.getElementById('cart-modal');
+        const cartModalContent = document.getElementById('cart-modal-content');
+        const closeCartModalButton = document.getElementById('close-cart-modal');
+        const cartItemsList = document.getElementById('cart-items-list');
+        const cartTotalElement = document.getElementById('cart-total');
+        const checkoutButton = document.getElementById('checkout-button');
+        const viewCartLink = document.getElementById('view-cart-link');
+        const searchInput = document.getElementById('search-input');
+
+        // --- Variables del Carrusel de Marcas ---
+        let currentBrandIndex = 0;
+        const brandsPerPage = 4; // Número de logos a mostrar por "página" del carrusel
+        let brandCarouselDiv;
+        let carouselPrevButton;
+        let carouselNextButton;
+        let carouselDotsContainer;
+
+        /**
+         * Muestra una caja de mensajes modal personalizada.
+         * @param {string} title - El título de la caja de mensajes.
+         * @param {string} message - El mensaje a mostrar.
+         * @param {boolean} [isConfirm=false] - Si es true, muestra un botón de "Cancelar".
+         * @returns {Promise<boolean>} Resuelve a true si se presiona OK, false si se presiona Cancelar.
+         */
+        function showMessageBox(title, message, isConfirm = false) {
+            messageBoxTitle.textContent = title;
+            messageBoxMessage.textContent = message;
+            messageBoxCancelButton.style.display = isConfirm ? 'inline-block' : 'none';
+            messageBox.classList.remove('hidden');
+            // Animación para mostrar la caja de mensajes
+            messageBoxContent.classList.remove('scale-95', 'opacity-0');
+            messageBoxContent.classList.add('scale-100', 'opacity-100');
+
+            return new Promise((resolve) => {
+                const handleOk = () => {
+                    messageBox.classList.add('hidden');
+                    // Animación para ocultar la caja de mensajes
+                    messageBoxContent.classList.remove('scale-100', 'opacity-100');
+                    messageBoxContent.classList.add('scale-95', 'opacity-0');
+                    // Limpiar los event listeners para evitar múltiples ejecuciones
+                    messageBoxOkButton.removeEventListener('click', handleOk);
+                    messageBoxCancelButton.removeEventListener('click', handleCancel);
+                    resolve(true);
+                };
+
+                const handleCancel = () => {
+                    messageBox.classList.add('hidden');
+                    // Animación para ocultar la caja de mensajes
+                    messageBoxContent.classList.remove('scale-100', 'opacity-100');
+                    messageBoxContent.classList.add('scale-95', 'opacity-0');
+                    // Limpiar los event listeners
+                    messageBoxOkButton.removeEventListener('click', handleOk);
+                    messageBoxCancelButton.removeEventListener('click', handleCancel);
+                    resolve(false);
+                };
+
+                messageBoxOkButton.addEventListener('click', handleOk);
+                if (isConfirm) {
+                    messageBoxCancelButton.addEventListener('click', handleCancel);
+                }
+            });
+        }
+
+        // --- Funciones para la navegación y renderizado de secciones ---
+
+        /**
+         * Muestra una sección y oculta las demás.
+         * @param {HTMLElement} sectionToShow - La sección del DOM a mostrar.
+         */
+        function showSection(sectionToShow) {
+            homeSection.classList.add('hidden');
+            productsSection.classList.add('hidden');
+            aboutSection.classList.add('hidden'); // Ocultar la sección "Acerca de"
+            contactSection.classList.add('hidden');
+
+            sectionToShow.classList.remove('hidden');
+
+            // Si se muestra la sección de productos, renderizarlos
+            if (sectionToShow === productsSection) {
+                renderProducts(products, document.getElementById('product-list')); // Renderiza todos los productos
+                searchInput.value = ''; // Limpia el campo de búsqueda al cambiar a la vista completa de productos
+            }
+            // Si se muestra la sección Acerca de, inicializar el carrusel y generar imágenes de mecánicos
+            if (sectionToShow === aboutSection) {
+                renderBrandCarousel();
+            }
+        }
+
+        /**
+         * Normaliza una cadena de texto (a minúsculas y sin tildes).
+         * @param {string} text - El texto a normalizar.
+         * @returns {string} El texto normalizado.
+         */
+        function normalizeText(text) {
+            if (typeof text !== 'string') {
+                return ''; // Retorna una cadena vacía si no es un string
+            }
+            return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        }
+
+        /**
+         * Renderiza dinámicamente las tarjetas de productos en la página.
+         * @param {Array} productsToRender - (Opcional) Array de productos a renderizar. Si no se proporciona, usa el array global `products`.
+         * @param {HTMLElement} targetDiv - El elemento DIV donde se renderizarán los productos (por defecto, 'product-list').
+         */
+        function renderProducts(productsToRender = products, targetDiv = document.getElementById('product-list')) {
+            targetDiv.innerHTML = ''; // Limpiar la lista antes de renderizar nuevos productos
+
+            if (productsToRender.length === 0) {
+                targetDiv.innerHTML = '<p class="col-span-full text-center text-sac-text-medium text-xl py-10">No se encontraron productos que coincidan con su búsqueda.</p>';
+                return;
+            }
+
+            productsToRender.forEach(product => {
+                const productCard = document.createElement('div');
+                // Clases de Tailwind para estilo y responsividad de las tarjetas de productos
+                productCard.className = `bg-white rounded-xl shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-2 duration-300 overflow-hidden ${product.stock === 0 ? 'opacity-70 grayscale' : ''}`;
+                productCard.innerHTML = `
+                    <img src="${product.imageUrl}" alt="${product.name}" class="w-full h-48 object-cover rounded-t-xl border-b border-sac-border">
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold mb-2 text-sac-dark">${product.name}</h3>
+                        <p class="text-sac-text-medium text-lg font-bold mb-3">$${product.price.toFixed(2)}</p>
+                        <p class="text-sm text-sac-text-medium mb-4">Stock: <span id="stock-${product.id}" class="${product.stock > 5 ? 'text-sac-success' : product.stock > 0 ? 'text-orange-500' : 'text-red-600 font-bold'}">${product.stock > 0 ? product.stock : 'Agotado'}</span></p>
+
+                        <!-- Controles de cantidad -->
+                        <div class="flex items-center space-x-2 mb-4">
+                            <button data-product-id="${product.id}" class="quantity-btn quantity-minus p-2 bg-sac-border rounded-full hover:bg-sac-text-light focus:outline-none focus:ring-2 focus:ring-sac-accent transition duration-150">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+                            </button>
+                            <input type="number" id="quantity-${product.id}" value="1" min="1" max="${product.stock}"
+                                class="w-16 text-center border border-sac-border rounded-lg py-1 px-2 focus:outline-none focus:ring-2 focus:ring-sac-accent"
+                                ${product.stock === 0 ? 'disabled' : ''}>
+                            <button data-product-id="${product.id}" class="quantity-btn quantity-plus p-2 bg-sac-border rounded-full hover:bg-sac-text-light focus:outline-none focus:ring-2 focus:ring-sac-accent transition duration-150"
+                                ${product.stock === 0 ? 'disabled' : ''}>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            </button>
+                        </div>
+                        
+                        <button data-product-id="${product.id}"
+                                class="add-to-cart-btn w-full py-3 rounded-lg text-white font-semibold transition duration-300
+                                       ${product.stock === 0 ? 'bg-sac-border cursor-not-allowed' : 'bg-sac-accent hover:bg-red-700 shadow-md hover:shadow-lg'}"
+                                ${product.stock === 0 ? 'disabled' : ''}>
+                            ${product.stock === 0 ? 'Agotado' : 'Agregar al Carrito'}
+                        </button>
+                    </div>
+                `;
+                targetDiv.appendChild(productCard);
+            });
+
+            // Re-adjuntar event listeners para los botones de cantidad y añadir al carrito
+            targetDiv.querySelectorAll('.add-to-cart-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const productId = event.target.dataset.productId;
+                    const quantityInput = document.getElementById(`quantity-${productId}`);
+                    const quantity = parseInt(quantityInput.value, 10);
+                    addToCart(productId, quantity);
+                });
+            });
+
+            targetDiv.querySelectorAll('.quantity-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const productId = event.target.closest('button').dataset.productId;
+                    const quantityInput = document.getElementById(`quantity-${productId}`);
+                    let currentQuantity = parseInt(quantityInput.value, 10);
+                    const product = products.find(p => p.id === productId);
+
+                    if (event.target.closest('button').classList.contains('quantity-plus')) {
+                        if (currentQuantity < product.stock) {
+                            quantityInput.value = currentQuantity + 1;
+                        }
+                    } else if (event.target.closest('button').classList.contains('quantity-minus')) {
+                        if (currentQuantity > 1) {
+                            quantityInput.value = currentQuantity - 1;
+                        }
+                    }
+                    if (parseInt(quantityInput.value, 10) > product.stock) {
+                        quantityInput.value = product.stock;
+                    }
+                    if (parseInt(quantityInput.value, 10) < 1) {
+                        quantityInput.value = 1;
+                    }
+                });
+            });
+        }
+
+        /**
+         * Renderiza 3 productos destacados en la sección de inicio.
+         */
+        function renderFeaturedProducts() {
+            // Seleccionar los primeros 3 productos o algunos específicos si los hubiera
+            const featured = products.slice(0, 3);
+            renderProducts(featured, featuredProductListDiv);
+        }
+
+        // --- Funciones del Carrito ---
+
+        /**
+         * Agrega un producto al carrito de compras.
+         * @param {string} productId - El ID del producto a agregar.
+         * @param {number} quantity - La cantidad de producto a agregar.
+         */
+        async function addToCart(productId, quantity) {
+            const product = products.find(p => p.id === productId);
+
+            if (quantity <= 0) {
+                await showMessageBox('Cantidad Inválida', 'Por favor, selecciona al menos una unidad.', false);
+                return;
+            }
+
+            if (product && product.stock >= quantity) {
+                const itemInCart = cart.find(item => item.id === productId);
+
+                if (itemInCart) {
+                    itemInCart.quantity += quantity;
+                } else {
+                    cart.push({ ...product, quantity: quantity });
+                }
+                product.stock -= quantity; // Disminuir el stock en la UI
+                updateCartCount();
+                renderProducts(products); // Volver a renderizar todos los productos para actualizar stock visual
+                renderFeaturedProducts(); // Actualizar el stock también en los destacados
+
+                await showMessageBox('Producto Agregado', `"${product.name}" (x${quantity}) ha sido añadido a tu carrito.`, false);
+                console.log('Carrito:', cart);
+
+                // En un caso real, aquí enviarías una solicitud al backend para actualizar el stock.
+                // await simulateBackendUpdateStock(productId, product.stock);
+
+            } else if (product && product.stock < quantity) {
+                await showMessageBox('Lo Sentimos', `Solo quedan ${product.stock} unidades de "${product.name}".`, false);
+            } else if (product && product.stock === 0) {
+                await showMessageBox('Lo Sentimos', `"${product.name}" está agotado.`, false);
+            }
+        }
+
+        /**
+         * Actualiza el contador de artículos en el carrito en el encabezado.
+         */
+        function updateCartCount() {
+            const cartCountElement = document.getElementById('cart-count');
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCountElement.textContent = totalItems;
+        }
+
+        /**
+         * Renderiza los elementos dentro del modal del carrito.
+         */
+        function renderCartItems() {
+            cartItemsList.innerHTML = ''; // Limpiar la lista antes de renderizar
+            let total = 0;
+
+            if (cart.length === 0) {
+                cartItemsList.innerHTML = '<p class="text-sac-text-medium text-center py-4">El carrito está vacío.</p>';
+            } else {
+                cart.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'flex justify-between items-center py-2 border-b border-sac-border last:border-b-0';
+                    const itemSubtotal = item.price * item.quantity;
+                    total += itemSubtotal;
+                    itemElement.innerHTML = `
+                        <span class="text-sac-dark">${item.name} (x${item.quantity})</span>
+                        <span class="font-semibold text-sac-dark">$${itemSubtotal.toFixed(2)}</span>
+                    `;
+                    cartItemsList.appendChild(itemElement);
+                });
+            }
+            cartTotalElement.textContent = `$${total.toFixed(2)}`;
+        }
+
+        /**
+         * Muestra el modal del carrito.
+         */
+        function showCartModal() {
+            renderCartItems(); // Renderizar los items del carrito antes de mostrar el modal
+            cartModal.classList.remove('hidden');
+            // Animación para mostrar el modal
+            cartModalContent.classList.remove('scale-95', 'opacity-0');
+            cartModalContent.classList.add('scale-100', 'opacity-100');
+        }
+
+        /**
+         * Oculta el modal del carrito.
+         */
+        function hideCartModal() {
+            cartModal.classList.add('hidden');
+            // Animación para ocultar el modal
+            cartModalContent.classList.remove('scale-100', 'opacity-100');
+            cartModalContent.classList.add('scale-95', 'opacity-0');
+        }
+
+        /**
+         * Simula el proceso de finalizar la compra (checkout).
+         */
+        async function checkout() {
+            if (cart.length === 0) {
+                await showMessageBox('Carrito Vacío', 'No hay productos en tu carrito para finalizar la compra.', false);
+                return;
+            }
+
+            const confirmCheckout = await showMessageBox(
+                'Confirmar Compra',
+                `Estás a punto de comprar ${cart.reduce((sum, item) => sum + item.quantity, 0)} artículos por un total de $${cartTotalElement.textContent.replace('$', '')}. ¿Deseas continuar?`,
+                true
+            );
+
+            if (confirmCheckout) {
+                // En un escenario real, aquí enviarías los datos del carrito al backend
+                // para procesar la orden y el pago real.
+                console.log('Procesando compra de:', cart);
+                await showMessageBox('Compra Exitosa', '¡Gracias por tu compra! Tu pedido ha sido procesado (simulado).', false);
+
+                // Limpiar el carrito después de una compra exitosa
+                cart = [];
+                updateCartCount();
+                hideCartModal();
+                // Opcional: podrías volver a cargar los productos desde el backend para asegurarte de que los stocks están actualizados
+                // await fetchPricesAndStockFromBackend();
+            } else {
+                await showMessageBox('Compra Cancelada', 'Has cancelado el proceso de compra.', false);
+            }
+        }
+
+        /**
+         * Filtra los productos basándose en el texto de búsqueda y los renderiza.
+         */
+        function searchProducts() {
+            const searchTerm = normalizeText(searchInput.value);
+            const filteredProducts = products.filter(product =>
+                product && product.name && normalizeText(product.name).includes(searchTerm)
+            );
+            renderProducts(filteredProducts, document.getElementById('product-list')); // Asegurarse de renderizar en la lista principal de productos
+        }
+
+        // --- Generación de Imágenes para la sección "Sobre Nosotros" ---
+        async function generateAndDisplayMechanicImages() {
+            const prompts = [
+                "Mecánico automotriz trabajando en el motor de un coche con herramientas, ambiente de taller limpio",
+                "Dos mecánicos revisando un vehículo en un taller automotriz moderno, trabajando en equipo",
+                "Variedad de herramientas automotrices organizadas en un taller, con fondo desenfocado de un vehículo",
+                "Estantes llenos de diversos repuestos automotrices, organizados por tipo, con etiquetas visibles"
+            ];
+
+            mechanicImagesContainer.innerHTML = `
+                <div class="col-span-full flex items-center justify-center h-48 bg-gray-200 rounded-lg shadow-md">
+                    <div class="spinner mr-2"></div> Cargando imágenes...
+                </div>
+            `;
+
+            try {
+                const imageUrls = await Promise.all(prompts.map(async (prompt) => {
+                    const payload = { instances: { prompt: prompt }, parameters: { "sampleCount": 1} };
+                    const apiKey = ""; // La API key será proporcionada por el entorno de Canvas
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+                    
+                    let response;
+                    let result;
+                    try {
+                        response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            // Si la respuesta HTTP no es exitosa, intenta leer el cuerpo del error si está disponible
+                            const errorText = await response.text();
+                            throw new Error(`Error HTTP: ${response.status} - ${response.statusText}. Respuesta: ${errorText}`);
+                        }
+                        
+                        // Intenta parsear la respuesta JSON
+                        result = await response.json();
+                        
+                    } catch (fetchError) {
+                        console.error("Error durante la petición fetch o parseo JSON:", fetchError);
+                        return `https://placehold.co/300x200/515A5A/AA9898?text=Error+Carga`; // Fallback si falla fetch o JSON parse
+                    }
+
+                    if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
+                        return `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+                    } else {
+                        console.error("Respuesta de la API de imagen inesperada o incompleta para el prompt:", prompt, result);
+                        return `https://placehold.co/300x200/515A5A/AA9898?text=Error+Imagen`; // Fallback si la estructura de la respuesta es incorrecta
+                    }
+                }));
+
+                mechanicImagesContainer.innerHTML = ''; // Limpiar el mensaje de carga
+                imageUrls.forEach((url, index) => {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.alt = prompts[index]; // Usar el prompt como alt text
+                    img.className = 'rounded-lg shadow-md w-full h-48 object-cover';
+                    mechanicImagesContainer.appendChild(img);
+                });
+
+            } catch (error) {
+                console.error("Error al generar y mostrar imágenes de mecánicos (catch externo):", error);
+                mechanicImagesContainer.innerHTML = `
+                    <p class="col-span-full text-center text-red-600">Error al cargar imágenes. Inténtalo de nuevo más tarde.</p>
+                `;
+            }
+        }
+
+
+        // --- Funciones del Carrusel de Marcas ---
+
+        /**
+         * Renderiza los logos de las marcas en el carrusel.
+         */
+        function renderBrandCarousel() {
+            if (!brandCarouselDiv) {
+                brandCarouselDiv = document.getElementById('brand-carousel');
+                carouselPrevButton = document.getElementById('carousel-prev');
+                carouselNextButton = document.getElementById('carousel-next');
+                carouselDotsContainer = document.getElementById('carousel-dots');
+
+                carouselPrevButton.addEventListener('click', () => navigateCarousel(-1));
+                carouselNextButton.addEventListener('click', () => navigateCarousel(1));
+            }
+            
+            brandCarouselDiv.innerHTML = '';
+            carouselDotsContainer.innerHTML = '';
+
+            const totalBrands = brandLogos.length;
+            const totalPages = Math.ceil(totalBrands / brandsPerPage);
+
+            // Crear las páginas del carrusel
+            for (let i = 0; i < totalPages; i++) {
+                const pageDiv = document.createElement('div');
+                pageDiv.className = `flex-none w-full grid grid-cols-2 md:grid-cols-4 gap-4 justify-items-center items-center p-4`; // Flex-none para evitar que los elementos se encojan
+                pageDiv.style.width = '100%'; // Asegura que cada página ocupe el ancho completo
+
+                const startIndex = i * brandsPerPage;
+                const endIndex = Math.min(startIndex + brandsPerPage, totalBrands);
+                const brandsOnPage = brandLogos.slice(startIndex, endIndex);
+
+                brandsOnPage.forEach(brand => {
+                    const imgContainer = document.createElement('div');
+                    imgContainer.className = 'w-28 h-16 sm:w-32 sm:h-20 flex items-center justify-center bg-white rounded-lg shadow-md p-2'; // Contenedor para cada logo
+                    const img = document.createElement('img');
+                    img.src = brand.url;
+                    img.alt = brand.name + ' Logo';
+                    img.className = 'max-w-full max-h-full object-contain'; // Asegura que el logo se ajuste al contenedor
+                    imgContainer.appendChild(img);
+                    pageDiv.appendChild(imgContainer);
+                });
+                brandCarouselDiv.appendChild(pageDiv);
+
+                // Crear los puntos de navegación
+                const dot = document.createElement('span');
+                dot.className = `w-3 h-3 rounded-full bg-sac-border cursor-pointer transition-colors duration-300 ${i === currentBrandIndex / brandsPerPage ? 'bg-sac-accent' : ''}`;
+                dot.dataset.pageIndex = i;
+                dot.addEventListener('click', (e) => {
+                    currentBrandIndex = parseInt(e.target.dataset.pageIndex) * brandsPerPage;
+                    updateCarousel();
+                });
+                carouselDotsContainer.appendChild(dot);
+            }
+
+            updateCarousel();
+        }
+
+        /**
+         * Navega el carrusel a la siguiente o anterior "página" de logos.
+         * @param {number} direction - -1 para anterior, 1 para siguiente.
+         */
+        function navigateCarousel(direction) {
+            const totalBrands = brandLogos.length;
+            const totalPages = Math.ceil(totalBrands / brandsPerPage);
+            const currentPage = currentBrandIndex / brandsPerPage;
+
+            let newPageIndex = currentPage + direction;
+
+            if (newPageIndex < 0) {
+                newPageIndex = totalPages - 1; // Ir a la última página si se va hacia atrás desde la primera
+            } else if (newPageIndex >= totalPages) {
+                newPageIndex = 0; // Ir a la primera página si se va hacia adelante desde la última
+            }
+
+            currentBrandIndex = newPageIndex * brandsPerPage;
+            updateCarousel();
+        }
+
+        /**
+         * Actualiza la visualización del carrusel y los puntos de navegación.
+         */
+        function updateCarousel() {
+            const offset = -currentBrandIndex / brandsPerPage * 100;
+            brandCarouselDiv.style.transform = `translateX(${offset}%)`;
+
+            // Actualizar los puntos de navegación
+            document.querySelectorAll('#carousel-dots span').forEach((dot, index) => {
+                if (index === currentBrandIndex / brandsPerPage) {
+                    dot.classList.add('bg-sac-accent');
+                    dot.classList.remove('bg-sac-border');
+                } else {
+                    dot.classList.remove('bg-sac-accent');
+                    dot.classList.add('bg-sac-border');
+                }
+            });
+        }
+
+        // --- Simulación de backend para actualización de precios y stock ---
+        // En un entorno de producción, estas funciones realizarían llamadas fetch a tu API REST.
+
+        /**
+         * Simula la obtención de precios y stock desde un backend.
+         * En tu servidor real, esto sería una llamada GET a un endpoint como /api/products
+         */
+        async function fetchPricesAndStockFromBackend() {
+            try {
+                // Simula un retraso de red para emular una llamada real a la API
+                await new Promise(resolve => setTimeout(Math.random() * 500 + 300, resolve));
+
+                // Datos simulados del backend (estos podrían ser diferentes a los iniciales)
+                const backendData = [
+                    { id: 'prod001', name: 'Kit de Embrague (Línea Liviana)', price: 155.00, stock: 8 },
+                    { id: 'prod002', name: 'Bujías Iridium (4 unidades)', price: 28.00, stock: 45 },
+                    { id: 'prod003', name: 'Cables de Bujías (Juego)', price: 44.00, stock: 28 },
+                    { id: 'prod004', name: 'Discos de Freno Ventilados (Par)', price: 105.00, stock: 15 },
+                    { id: 'prod005', name: 'Pastillas de Freno Cerámicas (Juego)', price: 62.00, stock: 20 },
+                    { id: 'prod006', name: 'Servo Freno (Universal)', price: 215.00, stock: 5 },
+                    { id: 'prod007', name: 'Amortiguador Delantero (Unidad)', price: 80.00, stock: 10 },
+                    { id: 'prod008', name: 'Bieleta de Suspensión (Unidad)', price: 34.00, stock: 35 },
+                    { id: 'prod009', name: 'Kit Suspensión Trasera (Línea Pesada)', price: 460.00, stock: 4 },
+                    { id: 'prod010', name: 'Filtro de Aceite (Universal)', price: 11.99, stock: 90 }
+                ];
+
+                // Actualizar los productos existentes con los datos del backend simulado
+                products = backendData; // Reemplazar directamente con los datos del "backend" para esta demo
+
+                console.log("Precios y stock actualizados desde el backend simulado.");
+                renderProducts(products, document.getElementById('product-list')); // Renderizar todos los productos para la sección de productos
+                renderFeaturedProducts(); // Renderizar los productos destacados para la sección de inicio
+            } catch (error) {
+                console.error("Error al simular la obtención de datos del backend:", error);
+                await showMessageBox('Error de Carga', 'No se pudieron actualizar los datos del servidor. Inténtalo de nuevo más tarde.', false);
+            }
+        }
+
+        /**
+         * Simula el envío de una actualización de stock al backend.
+         * En tu servidor real, esto sería una llamada PUT/PATCH a un endpoint como /api/products/{id}/stock
+         * @param {string} productId - El ID del producto cuyo stock se actualiza.
+         * @param {number} newStock - El nuevo valor de stock.
+         */
+        async function simulateBackendUpdateStock(productId, newStock) {
+            try {
+                // Comentado para evitar errores de red en el entorno de demostración
+                // const response = await fetch(`/api/products/${productId}/stock`, {
+                //     method: 'PATCH', // O 'PUT' dependiendo de tu API
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify({ stock: newStock })
+                // });
+                // const data = await response.json();
+                // console.log(`Backend respondió a la actualización de stock para ${productId}:`, data);
+
+                await new Promise(resolve => setTimeout(200, resolve)); // Simula un retraso de la red
+                console.log(`Simulando actualización de stock en el backend para ${productId} a ${newStock}`);
+
+            } catch (error) {
+                console.error("Error al simular la actualización de stock en el backend:", error);
+                await showMessageBox('Error de Backend', 'No se pudo comunicar la actualización de stock al servidor.', false);
+                // Aquí podrías querer revertir el cambio en el front-end si el backend falla.
+            }
+        }
+
+        // --- Inicialización de la aplicación ---
+        window.onload = async function() {
+            // Inicialmente, mostrar la sección de inicio
+            showSection(homeSection);
+
+            updateCartCount(); // Actualizar el contador del carrito
+
+            // Asignar event listeners para la navegación
+            navHomeLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSection(homeSection);
+            });
+
+            navProductsLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSection(productsSection);
+            });
+
+            // Nuevo event listener para el enlace "Acerca de"
+            navAboutLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSection(aboutSection);
+            });
+
+            // Nuevo event listener para el enlace de Contacto
+            navContactLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSection(contactSection);
+            });
+
+            // Enlace desde "Sobre Nosotros" a Contacto
+            aboutToContactLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSection(contactSection);
+            });
+
+            // Asignar event listeners para el modal del carrito
+            viewCartLink.addEventListener('click', (e) => {
+                e.preventDefault(); // Prevenir el comportamiento predeterminado del enlace
+                showCartModal();
+            });
+            closeCartModalButton.addEventListener('click', hideCartModal);
+            checkoutButton.addEventListener('click', checkout);
+
+            // Event listener para la barra de búsqueda (solo afecta la sección de productos)
+            searchInput.addEventListener('keyup', searchProducts);
+
+            // Generar las imágenes de mecánicos y taller
+            await generateAndDisplayMechanicImages();
+            
+            // Simular la conexión al backend después de un breve tiempo para obtener datos actualizados
+            await showMessageBox('Cargando Datos', 'Conectando con el servidor para obtener los últimos precios y stock...', false);
+            await fetchPricesAndStockFromBackend(); // Llamar a la función que simula la obtención de datos del backend
+            await showMessageBox('¡Listo!', 'Los datos se han cargado correctamente. ¡Disfruta la tienda!', false);
+        };
+    </script>
+</body>
+</html>
